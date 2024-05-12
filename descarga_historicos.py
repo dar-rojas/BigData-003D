@@ -17,7 +17,7 @@ def download_historical_data(request):
     url_data = get_data(api_url).json()
     if url_data:
         resources = url_data['result']['resources'] 
-        urls = {i['id']:i['url'] for i in resources}
+        urls = {i['name'][14:22]:i['url'] for i in resources}
 
     # google cloud bucket
     client = storage.Client()
