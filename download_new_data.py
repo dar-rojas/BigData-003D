@@ -11,7 +11,7 @@ def download_data(request):
     #URL de DTPM a scrapear
     dtpm_scrap_url = 'https://www.dtpm.cl/index.php/gtfs-vigente'
     #bucket donde se guardan los archivos descargas
-    bucket_id: str = ' '
+    bucket_id: str = 'bigdata003d'
     #patron de regex para obtener la info a scrapear
     patron = r'(\/descargas\/gtfs\/((GTFS-V\d+-PO)(\d+)(\.zip)))'
 
@@ -30,8 +30,8 @@ def download_data(request):
     client = storage.Client()
     bucket = client.bucket(bucket_id)
 
-    save_data(zip_url[0][1], bucket=bucket, url=f'{dtpm_url}{zip_url[0][0][1:]}')
-    unzip(date=zip_url[0][3], object_name=zip_url[0][1], bucket=bucket)
+    save_data(zip_url[0][3], bucket=bucket, url=f'{dtpm_url}{zip_url[0][0][1:]}')
+    unzip(date=zip_url[0][3], object_name=f'{zip_url[0][3]}.zip', bucket=bucket)
     return "Ok"
 
 
@@ -41,7 +41,7 @@ def get_data(url: str) -> requests.Response:
         if response.status_code != 200:
             print(f"Could't get data from {url}. Status code: {response.status_code}")
         else:
-            return response.content
+            return response
     except requests.exceptions.RequestException as e:
         print(f'Connection Error: {e}')
         return None
@@ -53,7 +53,7 @@ def save_data(filename: str, bucket: storage.Bucket, url: requests.Response):
         file.write(data)
 
 def unzip(date: str, object_name: str, bucket: storage.Bucket):
-    blob: storage.Blob =  bucket.blob(object_name)
+    blob: storage.Blob =  bucket.blob(f'Downloads/{object_name}')
 
     with tempfile.NamedTemporaryFile() as temp_file:
         blob.download_to_filename(temp_file.name)
